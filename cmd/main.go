@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"server-go/internal/config"
-	"server-go/internal/config/migrations"
 	"server-go/internal/handlers"
 	"server-go/internal/repositories"
 	"server-go/internal/routes"
@@ -13,15 +12,10 @@ import (
 )
 
 func main() {
-	db, err := config.SetupDatabase()
 
-	if err != nil {
-		log.Fatalf("Не удалось подключиться к базе данных: %v", err)
-	}
+	config.InitDB()
 
-	migrations.Migrate(db)
-
-	tourRepository := repositories.NewTourRepository(db)
+	tourRepository := repositories.NewTourRepository(config.DB)
 	tourService := services.NewTourService(tourRepository)
 	tourHandler := handlers.NewTourHandler(tourService)
 
