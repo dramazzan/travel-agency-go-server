@@ -5,7 +5,7 @@ import (
 	"server-go/internal/handlers"
 )
 
-func SetupRoutes(router *gin.Engine, tourHandler *handlers.TourHandler) {
+func SetTourRoutes(router *gin.Engine, tourHandler *handlers.TourHandler) {
 	tours := router.Group("/tours")
 	{
 		tours.GET("", tourHandler.GetAllTours)
