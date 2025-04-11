@@ -16,21 +16,14 @@ func SetAuthRoutes(router *gin.Engine, authHandler *handlers.AuthHandler) {
 	admin := router.Group("/admin")
 	admin.Use(middleware.AuthMiddleware(), middleware.AdminMiddleware())
 	{
-		admin.GET("/dashboard", func(c *gin.Context) {
-			username := c.GetString("username")
-			c.JSON(200, gin.H{"message": "Welcome Admin " + username + "!"})
-		})
+		admin.GET("/dashboard", authHandler.OpenAdminProfile)
 	}
 
 	protected := router.Group("/protected")
 	protected.Use(middleware.AuthMiddleware())
 	{
-		protected.GET("/dashboard", func(c *gin.Context) {
-			username := c.GetString("username")
-			c.JSON(200, gin.H{
-				"message": "Welcome to your dashboard, " + username,
-			})
-		})
+		protected.GET("/dashboard", authHandler.OpenUserProfile)
+
 	}
 
 }

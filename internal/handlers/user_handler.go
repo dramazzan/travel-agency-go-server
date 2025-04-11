@@ -56,3 +56,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
+
+func (h *AuthHandler) OpenAdminProfile(c *gin.Context) {
+	username := c.GetString("username")
+	c.JSON(200, gin.H{"message": "Welcome Admin " + username + "!"})
+}
+
+func (h *AuthHandler) OpenUserProfile(c *gin.Context) {
+	username := c.GetString("username")
+	c.JSON(200, gin.H{"message": "Welcome " + username + "!"})
+}
