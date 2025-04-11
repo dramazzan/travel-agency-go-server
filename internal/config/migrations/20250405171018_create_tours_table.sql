@@ -1,5 +1,4 @@
 -- +goose Up
-
 CREATE TABLE tours (
                        id SERIAL PRIMARY KEY,
                        name VARCHAR(255) NOT NULL,

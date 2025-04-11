@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  go-app:
+    build:
+      context: .
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=Kz123456
+      - DB_NAME=travel_agency
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Kz123456
+      - POSTGRES_DB=travel_agency
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:

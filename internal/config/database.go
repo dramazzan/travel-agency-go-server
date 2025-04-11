@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -15,7 +16,7 @@ import (
 var DB *gorm.DB
 
 func InitDB() {
-	dbHost := "localhost"
+	dbHost := "postgres"
 	dbName := "travel_agency"
 	dbUser := "postgres"
 	dbPass := "Kz123456"
@@ -23,15 +24,25 @@ func InitDB() {
 	sslmode := "disable"
 	dbUrl := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", dbUser, dbPass, dbHost, dbPort, dbName, sslmode)
 
-	sqlDB, err := sql.Open("postgres", dbUrl)
+	var sqlDB *sql.DB
+	var err error
+
+	// Попробовать подключение несколько раз с паузой
+	maxRetries := 10
+	for i := 0; i < maxRetries; i++ {
+		sqlDB, err = sql.Open("postgres", dbUrl)
+		if err == nil && sqlDB.Ping() == nil {
+			break
+		}
+		log.Printf("Попытка %d: БД еще не готова. Жду 2 секунды...\n", i+1)
+		time.Sleep(2 * time.Second)
+	}
+
 	if err != nil {
-		log.Fatal("Ошибка подключения к базе данных: ", err)
+		log.Fatalf("Не удалось подключиться к базе данных: %v", err)
 	}
 
-	if err := sqlDB.Ping(); err != nil {
-		log.Fatal("Ошибка подключения к базе данных: ", err)
-	}
-
+	// Применить миграции
 	if err := goose.Up(sqlDB, "./internal/config/migrations"); err != nil {
 		log.Fatalf("Ошибка при применении миграций: %v", err)
 	}
