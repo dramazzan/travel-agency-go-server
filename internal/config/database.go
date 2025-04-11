@@ -3,11 +3,10 @@ package config
 import (
 	"database/sql"
 	"fmt"
-	"log"
-	"os"
-
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
+	"os"
 
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose"
@@ -29,19 +28,17 @@ func InitDB() {
 	if err != nil {
 		log.Fatalf("Ошибка при открытии соединения: %v", err)
 	}
-	defer sqlDB.Close()
 
-	// Проверка соединения
+	// Удаляем defer sqlDB.Close() — потому что GORM будет использовать это соединение!
+
 	if err := sqlDB.Ping(); err != nil {
 		log.Fatalf("БД недоступна: %v", err)
 	}
 
-	// Применение миграций
 	if err := goose.Up(sqlDB, "./internal/config/migrations"); err != nil {
 		log.Fatalf("Ошибка при применении миграций: %v", err)
 	}
 
-	// Инициализация GORM
 	gormDB, err := gorm.Open(postgres.New(postgres.Config{
 		Conn: sqlDB,
 	}), &gorm.Config{})
