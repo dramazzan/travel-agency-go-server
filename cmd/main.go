@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"log"
 	"server-go/internal/config"
 	"server-go/internal/handlers"
@@ -11,9 +12,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func LoadEnv() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+}
+
 func main() {
 
 	config.InitDB()
+
+	LoadEnv()
 
 	tourRepository := repositories.NewTourRepository(config.DB)
 	tourService := services.NewTourService(tourRepository)
