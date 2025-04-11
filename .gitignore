@@ -1,0 +1,27 @@
+# Бинарники Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Каталоги
+bin/
+build/
+vendor/
+
+# Файлы зависимостей
+go.sum
+
+# IDE/Editor configs
+.idea/
+.vscode/
+
+# Операционная система
+.DS_Store
+Thumbs.db
+
+# .env файл (секреты)
+.env
