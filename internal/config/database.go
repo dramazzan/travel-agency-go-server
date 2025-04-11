@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -18,35 +17,31 @@ var DB *gorm.DB
 
 func InitDB() {
 	dbHost := os.Getenv("DB_HOST")
-	dbName := "travel_agency"
-	dbUser := "postgres"
-	dbPass := "Kz123456"
-	dbPort := "5432"
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
 	sslmode := "disable"
+
 	dbUrl := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", dbUser, dbPass, dbHost, dbPort, dbName, sslmode)
 
-	var sqlDB *sql.DB
-	var err error
-
-	// Попробовать подключение несколько раз с паузой
-	maxRetries := 10
-	for i := 0; i < maxRetries; i++ {
-		sqlDB, err = sql.Open("postgres", dbUrl)
-		if err == nil && sqlDB.Ping() == nil {
-			break
-		}
-		log.Printf("Попытка %d: БД еще не готова. Жду 2 секунды...\n", i+1)
-		time.Sleep(2 * time.Second)
-	}
-
+	sqlDB, err := sql.Open("postgres", dbUrl)
 	if err != nil {
-		log.Fatalf("Не удалось подключиться к базе данных: %v", err)
+		log.Fatalf("Ошибка при открытии соединения: %v", err)
+	}
+	defer sqlDB.Close()
+
+	// Проверка соединения
+	if err := sqlDB.Ping(); err != nil {
+		log.Fatalf("БД недоступна: %v", err)
 	}
 
+	// Применение миграций
 	if err := goose.Up(sqlDB, "./internal/config/migrations"); err != nil {
 		log.Fatalf("Ошибка при применении миграций: %v", err)
 	}
 
+	// Инициализация GORM
 	gormDB, err := gorm.Open(postgres.New(postgres.Config{
 		Conn: sqlDB,
 	}), &gorm.Config{})
