@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -16,7 +17,7 @@ import (
 var DB *gorm.DB
 
 func InitDB() {
-	dbHost := "postgres"
+	dbHost := os.Getenv("DB_HOST")
 	dbName := "travel_agency"
 	dbUser := "postgres"
 	dbPass := "Kz123456"
@@ -42,7 +43,6 @@ func InitDB() {
 		log.Fatalf("Не удалось подключиться к базе данных: %v", err)
 	}
 
-	// Применить миграции
 	if err := goose.Up(sqlDB, "./internal/config/migrations"); err != nil {
 		log.Fatalf("Ошибка при применении миграций: %v", err)
 	}
