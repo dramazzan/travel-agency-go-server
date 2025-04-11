@@ -13,6 +13,15 @@ func SetAuthRoutes(router *gin.Engine, authHandler *handlers.AuthHandler) {
 		auth.POST("/login", authHandler.Login)
 	}
 
+	admin := router.Group("/admin")
+	admin.Use(middleware.AuthMiddleware(), middleware.AdminMiddleware())
+	{
+		admin.GET("/dashboard", func(c *gin.Context) {
+			username := c.GetString("username")
+			c.JSON(200, gin.H{"message": "Welcome Admin " + username + "!"})
+		})
+	}
+
 	protected := router.Group("/protected")
 	protected.Use(middleware.AuthMiddleware())
 	{
