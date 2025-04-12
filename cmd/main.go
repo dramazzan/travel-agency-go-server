@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"log"
+	"os"
 	"server-go/internal/config"
 	"server-go/internal/handlers"
 	"server-go/internal/repositories"
@@ -12,6 +13,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func InitLogger() {
+	logFile, err := os.OpenFile("./logs/app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Не удалось открыть файл для логов: %v", err)
+	}
+
+	log.SetOutput(logFile)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
+
 func LoadEnv() {
 	err := godotenv.Load()
 	if err != nil {
@@ -20,10 +31,12 @@ func LoadEnv() {
 }
 
 func main() {
-
-	config.InitDB()
-
+	InitLogger()
+	log.Println("Приложение запущено")
 	LoadEnv()
+
+	log.Println("Попытка подключения к БД...")
+	config.InitDB()
 
 	tourRepository := repositories.NewTourRepository(config.DB)
 	tourService := services.NewTourService(tourRepository)
