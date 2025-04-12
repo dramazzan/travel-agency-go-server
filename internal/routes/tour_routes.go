@@ -7,13 +7,13 @@ import (
 )
 
 func SetTourRoutes(router *gin.Engine, tourHandler *handlers.TourHandler) {
-	tours := router.Group("/admin")
+	tours := router.Group("/tours")
 	{
 		tours.GET("", tourHandler.GetAllTours)
 
 	}
 
-	adminRoutes := router.Group("/admin/tours")
+	adminRoutes := router.Group("/admin/tour")
 	adminRoutes.Use(middleware.AuthMiddleware(), middleware.AdminMiddleware())
 	{
 		adminRoutes.GET("/:id", tourHandler.GetTourByID)
