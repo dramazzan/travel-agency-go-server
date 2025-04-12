@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -9,8 +11,6 @@ import (
 	"server-go/internal/repositories"
 	"server-go/internal/routes"
 	"server-go/internal/services"
-
-	"github.com/gin-gonic/gin"
 )
 
 func InitLogger() {
@@ -39,18 +39,26 @@ func main() {
 	config.InitDB()
 
 	tourRepository := repositories.NewTourRepository(config.DB)
-	tourService := services.NewTourService(tourRepository)
-	tourHandler := handlers.NewTourHandler(tourService)
-
 	basketRepository := repositories.NewBasketRepository(config.DB)
-	basketService := services.NewBasketService(basketRepository)
-	basketHandler := handlers.NewBasketHandler(basketService)
-
 	authRepository := repositories.NewAuthRepository(config.DB)
+
+	tourService := services.NewTourService(tourRepository)
+	basketService := services.NewBasketService(basketRepository)
 	authService := services.NewAuthService(authRepository, basketService)
+
+	tourHandler := handlers.NewTourHandler(tourService)
+	basketHandler := handlers.NewBasketHandler(basketService)
 	authHandler := handlers.NewAuthHandler(authService)
 
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	routes.SetTourRoutes(router, tourHandler)
 	routes.SetAuthRoutes(router, authHandler)
