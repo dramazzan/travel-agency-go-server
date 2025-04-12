@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"server-go/internal/auth"
 	"server-go/internal/models"
 	"server-go/internal/repositories"
@@ -14,11 +15,12 @@ type AuthService interface {
 }
 
 type authService struct {
-	repository repositories.AuthRepository
+	repository    repositories.AuthRepository
+	basketService BasketService
 }
 
-func NewAuthService(repository repositories.AuthRepository) AuthService {
-	return &authService{repository: repository}
+func NewAuthService(repository repositories.AuthRepository, basketService BasketService) AuthService {
+	return &authService{repository: repository, basketService: basketService}
 }
 
 func (s *authService) Register(username, email, password string) error {
@@ -42,7 +44,16 @@ func (s *authService) Register(username, email, password string) error {
 		Password: string(hashedPassword),
 	}
 
-	return s.repository.CreateUser(user)
+	if err := s.repository.CreateUser(user); err != nil {
+		return fmt.Errorf("error creating user: %w", err)
+	}
+
+	if _, err := s.basketService.CreateBasket(user.ID); err != nil {
+		log.Printf("error creating basket for user %d: %v", user.ID, err)
+		return fmt.Errorf("error creating basket: %w", err)
+	}
+
+	return nil
 }
 
 func (s *authService) Login(email, password string) (string, error) {
@@ -56,7 +67,7 @@ func (s *authService) Login(email, password string) (string, error) {
 		return "", fmt.Errorf("invalid email or password")
 	}
 
-	token, err := auth.GenerateToken(user.Username, user.Role)
+	token, err := auth.GenerateToken(user.ID, user.Username, user.Role)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate token: %w", err)
 	}

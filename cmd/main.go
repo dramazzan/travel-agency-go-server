@@ -42,14 +42,19 @@ func main() {
 	tourService := services.NewTourService(tourRepository)
 	tourHandler := handlers.NewTourHandler(tourService)
 
+	basketRepository := repositories.NewBasketRepository(config.DB)
+	basketService := services.NewBasketService(basketRepository)
+	basketHandler := handlers.NewBasketHandler(basketService)
+
 	authRepository := repositories.NewAuthRepository(config.DB)
-	authService := services.NewAuthService(authRepository)
+	authService := services.NewAuthService(authRepository, basketService)
 	authHandler := handlers.NewAuthHandler(authService)
 
 	router := gin.Default()
 
 	routes.SetTourRoutes(router, tourHandler)
 	routes.SetAuthRoutes(router, authHandler)
+	routes.SetBasketRoutes(router, basketHandler)
 
 	if err := router.Run(":8080"); err != nil {
 		log.Fatalf("Не удалось запустить сервер: %v", err)

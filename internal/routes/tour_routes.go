@@ -14,4 +14,5 @@ func SetTourRoutes(router *gin.Engine, tourHandler *handlers.TourHandler) {
 		tours.PUT("/:id", tourHandler.UpdateTour)
 		tours.DELETE("/:id", tourHandler.DeleteTour)
 	}
+
 }
