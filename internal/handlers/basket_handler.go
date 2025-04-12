@@ -63,3 +63,23 @@ func (h *BasketHandler) AddTourOnBasket(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Tour added to basket successfully"})
 }
+
+func (h *BasketHandler) RemoveTourFromBasket(c *gin.Context) {
+	userID := c.GetUint("userID")
+	basket, err := h.service.GetBasketByUserID(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tour ID"})
+	}
+	tourID, err := strconv.Atoi(c.Param("tourID"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get or create basket"})
+	}
+
+	error := h.service.RemoveTourFromBasket(basket.ID, uint(tourID))
+	if error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Basket removed successfully"})
+
+}

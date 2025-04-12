@@ -12,5 +12,6 @@ func SetBasketRoutes(router *gin.Engine, basketHandler *handlers.BasketHandler) 
 	{
 		basketRoute.POST("/tours/:tourID", basketHandler.AddTourOnBasket)
 		basketRoute.GET("/tours", basketHandler.GetBasket)
+		basketRoute.DELETE("/tours/:tourID", basketHandler.RemoveTourFromBasket)
 	}
 }
