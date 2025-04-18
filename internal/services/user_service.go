@@ -13,6 +13,7 @@ type AuthService interface {
 	Register(username, email, password string) error
 	Login(email, password string) (string, error)
 	GetUserDataById(id uint) (*models.User, error)
+	UpdateUser(user *models.User) error
 }
 
 type authService struct {
@@ -84,3 +85,11 @@ func (s *authService) GetUserDataById(id uint) (*models.User, error) {
 
 	return user, nil
 }
+
+func (s *authService) UpdateUser(user *models.User) error {
+	return s.repository.Update(user)
+}
+
+//func (s *tourService) UpdateTour(tour *models.Tour) error {
+//	return s.repository.Update(tour)
+//}

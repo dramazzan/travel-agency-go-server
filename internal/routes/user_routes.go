@@ -17,6 +17,7 @@ func SetAuthRoutes(router *gin.Engine, authHandler *handlers.AuthHandler) {
 	dashboard.Use(middleware.AuthMiddleware())
 	{
 		dashboard.GET("/dashboard", authHandler.GetUserData)
+		dashboard.PUT("/update", authHandler.UpdateUserData)
 	}
 
 	//admin := router.Group("/admin")

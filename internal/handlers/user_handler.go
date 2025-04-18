@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"server-go/internal/models"
 	"server-go/internal/services"
 
 	"github.com/gin-gonic/gin"
@@ -60,24 +61,63 @@ func (h *AuthHandler) Login(c *gin.Context) {
 func (h *AuthHandler) GetUserData(c *gin.Context) {
 	userId := c.GetUint("userID")
 	if userId == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user id is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user ID is required"})
+		return
 	}
 
 	user, err := h.service.GetUserDataById(userId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"erroe": "user not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"user": user})
+}
 
+func (h *AuthHandler) UpdateUserData(c *gin.Context) {
+	userId := c.GetUint("userID")
+	if userId == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user ID is required"})
+		return
+	}
+
+	var input struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	updatedUser := &models.User{
+		ID:       userId,
+		Username: input.Username,
+		Email:    input.Email,
+	}
+
+	if err := h.service.UpdateUser(updatedUser); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User updated successfully",
+		"user": gin.H{
+			"id":       userId,
+			"username": input.Username,
+			"email":    input.Email,
+		},
+	})
 }
 
 func (h *AuthHandler) OpenAdminProfile(c *gin.Context) {
 	username := c.GetString("username")
-	c.JSON(200, gin.H{"message": "Welcome Admin " + username + "!"})
+	c.JSON(http.StatusOK, gin.H{"message": "Welcome Admin " + username + "!"})
 }
 
 func (h *AuthHandler) OpenUserProfile(c *gin.Context) {
 	username := c.GetString("username")
-	c.JSON(200, gin.H{"message": "Welcome " + username + "!"})
+	c.JSON(http.StatusOK, gin.H{"message": "Welcome " + username + "!"})
 }
