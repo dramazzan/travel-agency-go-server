@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"server-go/internal/handlers"
+	"server-go/internal/middleware"
 )
 
 func SetAuthRoutes(router *gin.Engine, authHandler *handlers.AuthHandler) {
@@ -10,6 +11,12 @@ func SetAuthRoutes(router *gin.Engine, authHandler *handlers.AuthHandler) {
 	{
 		auth.POST("/register", authHandler.Register)
 		auth.POST("/login", authHandler.Login)
+	}
+
+	dashboard := router.Group("/user")
+	dashboard.Use(middleware.AuthMiddleware())
+	{
+		dashboard.GET("/dashboard", authHandler.GetUserData)
 	}
 
 	//admin := router.Group("/admin")

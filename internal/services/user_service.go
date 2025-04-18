@@ -12,6 +12,7 @@ import (
 type AuthService interface {
 	Register(username, email, password string) error
 	Login(email, password string) (string, error)
+	GetUserDataById(id uint) (*models.User, error)
 }
 
 type authService struct {
@@ -73,4 +74,13 @@ func (s *authService) Login(email, password string) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (s *authService) GetUserDataById(id uint) (*models.User, error) {
+	user, err := s.repository.GetUserById(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by id %d: %w", id, err)
+	}
+
+	return user, nil
 }

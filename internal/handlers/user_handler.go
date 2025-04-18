@@ -57,6 +57,21 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
+func (h *AuthHandler) GetUserData(c *gin.Context) {
+	userId := c.GetUint("userID")
+	if userId == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user id is required"})
+	}
+
+	user, err := h.service.GetUserDataById(userId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"erroe": "user not found"})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": user})
+
+}
+
 func (h *AuthHandler) OpenAdminProfile(c *gin.Context) {
 	username := c.GetString("username")
 	c.JSON(200, gin.H{"message": "Welcome Admin " + username + "!"})
