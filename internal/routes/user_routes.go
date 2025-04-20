@@ -6,31 +6,26 @@ import (
 	"server-go/internal/middleware"
 )
 
-func SetAuthRoutes(router *gin.Engine, authHandler *handlers.AuthHandler) {
-	auth := router.Group("/auth")
+func SetAuthRoutes(r *gin.Engine, h *handlers.AuthHandler) {
+	auth := r.Group("/auth")
 	{
-		auth.POST("/register", authHandler.Register)
-		auth.POST("/login", authHandler.Login)
+		auth.POST("/register", h.Register)
+		auth.POST("/login", h.Login)
 	}
 
-	dashboard := router.Group("/user")
-	dashboard.Use(middleware.AuthMiddleware())
+	user := r.Group("/user", middleware.AuthMiddleware())
 	{
-		dashboard.GET("/dashboard", authHandler.GetUserData)
-		dashboard.PUT("/update", authHandler.UpdateUserData)
+		user.GET("/dashboard", h.GetUserData)
+		user.PUT("/update", h.UpdateUserData)
 	}
 
-	//admin := router.Group("/admin")
-	//admin.Use(middleware.AuthMiddleware(), middleware.AdminMiddleware())
-	//{
-	//	admin.GET("/dashboard", authHandler.OpenAdminProfile)
-	//}
+	// admin := r.Group("/admin", middleware.AuthMiddleware(), middleware.AdminMiddleware())
+	// {
+	// 	admin.GET("/dashboard", h.OpenAdminProfile)
+	// }
 
-	//protected := router.Group("/protected")
-	//protected.Use(middleware.AuthMiddleware())
-	//{
-	//	protected.GET("/dashboard", authHandler.OpenUserProfile)
-	//
-	//}
-
+	// protected := r.Group("/protected", middleware.AuthMiddleware())
+	// {
+	// 	protected.GET("/dashboard", h.OpenUserProfile)
+	// }
 }

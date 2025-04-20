@@ -2,8 +2,9 @@ package services
 
 import (
 	"fmt"
-	"golang.org/x/crypto/bcrypt"
 	"log"
+
+	"golang.org/x/crypto/bcrypt"
 	"server-go/internal/auth"
 	"server-go/internal/models"
 	"server-go/internal/repositories"
@@ -17,22 +18,21 @@ type AuthService interface {
 }
 
 type authService struct {
-	repository    repositories.AuthRepository
+	repo          repositories.AuthRepository
 	basketService BasketService
 }
 
-func NewAuthService(repository repositories.AuthRepository, basketService BasketService) AuthService {
-	return &authService{repository: repository, basketService: basketService}
+func NewAuthService(repo repositories.AuthRepository, basketService BasketService) AuthService {
+	return &authService{repo: repo, basketService: basketService}
 }
 
 func (s *authService) Register(username, email, password string) error {
-	existingUser, err := s.repository.GetUserByEmail(email)
-	if err != nil {
-		if err.Error() != "record not found" {
-			return fmt.Errorf("error checking existing user: %w", err)
-		}
-	} else if existingUser != nil {
+	existingUser, err := s.repo.GetUserByEmail(email)
+	if err == nil && existingUser != nil {
 		return fmt.Errorf("user with email %s already exists", email)
+	}
+	if err != nil && err.Error() != "record not found" {
+		return fmt.Errorf("error checking existing user: %w", err)
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -46,7 +46,7 @@ func (s *authService) Register(username, email, password string) error {
 		Password: string(hashedPassword),
 	}
 
-	if err := s.repository.CreateUser(user); err != nil {
+	if err := s.repo.CreateUser(user); err != nil {
 		return fmt.Errorf("error creating user: %w", err)
 	}
 
@@ -59,17 +59,16 @@ func (s *authService) Register(username, email, password string) error {
 }
 
 func (s *authService) Login(email, password string) (string, error) {
-	user, err := s.repository.GetUserByEmail(email)
+	user, err := s.repo.GetUserByEmail(email)
 	if err != nil {
 		return "", fmt.Errorf("invalid email or password")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil {
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
 		return "", fmt.Errorf("invalid email or password")
 	}
 
-	token, err := auth.GenerateToken(user.ID, user.Username, user.Role)
+	token, err := auth.GenerateToken(user.ID, user.Username, user.Role, 24)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate token: %w", err)
 	}
@@ -78,18 +77,13 @@ func (s *authService) Login(email, password string) (string, error) {
 }
 
 func (s *authService) GetUserDataById(id uint) (*models.User, error) {
-	user, err := s.repository.GetUserById(id)
+	user, err := s.repo.GetUserById(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user by id %d: %w", id, err)
 	}
-
 	return user, nil
 }
 
 func (s *authService) UpdateUser(user *models.User) error {
-	return s.repository.Update(user)
+	return s.repo.Update(user)
 }
-
-//func (s *tourService) UpdateTour(tour *models.Tour) error {
-//	return s.repository.Update(tour)
-//}

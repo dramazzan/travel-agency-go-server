@@ -15,47 +15,37 @@ type BasketService interface {
 }
 
 type basketService struct {
-	repository repositories.BasketRepository
+	repo repositories.BasketRepository
 }
 
-func NewBasketService(repository repositories.BasketRepository) BasketService {
-	return &basketService{repository: repository}
+func NewBasketService(repo repositories.BasketRepository) BasketService {
+	return &basketService{repo: repo}
 }
 
 func (s *basketService) CreateBasket(userID uint) (models.Basket, error) {
-	existingBasket, _ := s.repository.FindByUserID(userID)
-	if existingBasket.ID != 0 {
+	if basket, err := s.repo.FindByUserID(userID); err == nil && basket.ID != 0 {
 		return models.Basket{}, errors.New("basket already exists")
 	}
 
-	basket := models.Basket{
-		UserID: userID,
-	}
-
-	err := s.repository.Create(&basket)
-	if err != nil {
+	basket := models.Basket{UserID: userID}
+	if err := s.repo.Create(&basket); err != nil {
 		return models.Basket{}, err
 	}
-
 	return basket, nil
 }
 
 func (s *basketService) GetBasketByUserID(userID uint) (models.Basket, error) {
-	basket, err := s.repository.FindByUserID(userID)
-	if err != nil {
-		return models.Basket{}, err
-	}
-	return basket, nil
+	return s.repo.FindByUserID(userID)
 }
 
 func (s *basketService) AddTourToBasket(basketID, tourID uint) error {
-	return s.repository.AddTour(basketID, tourID)
+	return s.repo.AddTour(basketID, tourID)
 }
 
 func (s *basketService) RemoveTourFromBasket(basketID, tourID uint) error {
-	return s.repository.RemoveTour(basketID, tourID)
+	return s.repo.RemoveTour(basketID, tourID)
 }
 
 func (s *basketService) DeleteBasket(basketID uint) error {
-	return s.repository.Delete(basketID)
+	return s.repo.Delete(basketID)
 }

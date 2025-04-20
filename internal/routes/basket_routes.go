@@ -6,12 +6,11 @@ import (
 	"server-go/internal/middleware"
 )
 
-func SetBasketRoutes(router *gin.Engine, basketHandler *handlers.BasketHandler) {
-	basketRoute := router.Group("/basket")
-	basketRoute.Use(middleware.AuthMiddleware())
+func SetBasketRoutes(r *gin.Engine, h *handlers.BasketHandler) {
+	basket := r.Group("/basket", middleware.AuthMiddleware())
 	{
-		basketRoute.POST("/tours/:tourID", basketHandler.AddTourOnBasket)
-		basketRoute.GET("/tours", basketHandler.GetBasket)
-		basketRoute.DELETE("/tours/:tourID", basketHandler.RemoveTourFromBasket)
+		basket.POST("/tours/:tourID", h.AddTourToBasket)
+		basket.GET("/tours", h.GetBasket)
+		basket.DELETE("/tours/:tourID", h.RemoveTourFromBasket)
 	}
 }

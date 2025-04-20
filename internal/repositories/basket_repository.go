@@ -27,16 +27,20 @@ func (r *basketRepository) Create(basket *models.Basket) error {
 
 func (r *basketRepository) FindByUserID(userID uint) (models.Basket, error) {
 	var basket models.Basket
-	err := r.db.Preload("Tours").Where("user_id = ?", userID).First(&basket).Error
+	err := r.db.Preload("Tours").First(&basket, "user_id = ?", userID).Error
 	return basket, err
 }
 
 func (r *basketRepository) AddTour(basketID, tourID uint) error {
-	return r.db.Exec("INSERT INTO basket_tours (basket_id, tour_id) VALUES (?, ?)", basketID, tourID).Error
+	basket := models.Basket{ID: basketID}
+	tour := models.Tour{ID: tourID}
+	return r.db.Model(&basket).Association("Tours").Append(&tour)
 }
 
 func (r *basketRepository) RemoveTour(basketID, tourID uint) error {
-	return r.db.Exec("DELETE FROM basket_tours WHERE basket_id = ? AND tour_id = ?", basketID, tourID).Error
+	basket := models.Basket{ID: basketID}
+	tour := models.Tour{ID: tourID}
+	return r.db.Model(&basket).Association("Tours").Delete(&tour)
 }
 
 func (r *basketRepository) Delete(basketID uint) error {
