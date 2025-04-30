@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"server-go/internal/models"
 	"server-go/internal/services"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,6 +21,16 @@ type registerRequest struct {
 	Username string `json:"username" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
+}
+
+func (h *AuthHandler) GetAllUsers(c *gin.Context) {
+	users, err := h.service.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch users"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"users": users})
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -120,6 +131,75 @@ func (h *AuthHandler) UpdateUserData(c *gin.Context) {
 			"email":    input.Email,
 		},
 	})
+}
+
+func (h *AuthHandler) BlockUser(c *gin.Context) {
+	userId := c.Param("id")
+
+	role := c.GetString("role")
+	if role != "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only admins can block users"})
+		return
+	}
+
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+
+	if err := h.service.BlockUserByID(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User successfully blocked"})
+}
+
+func (h *AuthHandler) UnblockUser(c *gin.Context) {
+	userId := c.Param("id")
+
+	role := c.GetString("role")
+	if role != "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only admins can unblock users"})
+		return
+	}
+
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+
+	if err := h.service.UnblockUserByID(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User successfully unblocked"})
+}
+
+func (h *AuthHandler) DeleteUser(c *gin.Context) {
+	userId := c.Param("id")
+
+	role := c.GetString("role")
+	if role != "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only admins can delete users"})
+		return
+	}
+
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+
+	if err := h.service.DeleteUserByID(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User successfully deleted"})
 }
 
 func (h *AuthHandler) OpenAdminProfile(c *gin.Context) {

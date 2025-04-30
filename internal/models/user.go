@@ -11,6 +11,7 @@ type User struct {
 	Email     string         `json:"email" binding:"required,email" gorm:"unique"`
 	Password  string         `json:"-" binding:"required"`
 	Role      string         `json:"role" binding:"required" gorm:"default:'user'"`
+	IsBlocked bool           `json:"is_blocked" gorm:"default:false"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`

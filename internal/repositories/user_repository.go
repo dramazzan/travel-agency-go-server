@@ -10,6 +10,10 @@ type AuthRepository interface {
 	CreateUser(user *models.User) error
 	GetUserById(userId uint) (*models.User, error)
 	Update(user *models.User) error
+	GetAllUsers() ([]*models.User, error)
+	BlockUserByID(id uint) error
+	UnblockUserByID(id uint) error
+	DeleteUserByID(id uint) error
 }
 
 type authRepositoryImpl struct {
@@ -41,10 +45,29 @@ func (repo *authRepositoryImpl) GetUserById(userId uint) (*models.User, error) {
 }
 
 func (repo *authRepositoryImpl) Update(user *models.User) error {
-	updateData := map[string]interface{}{
-		"username": user.Username,
-		"email":    user.Email,
-	}
+	return repo.DB.Model(&models.User{}).Where("id = ?", user.ID).Updates(user).Error
+}
 
-	return repo.DB.Model(&models.User{}).Where("id = ?", user.ID).Updates(updateData).Error
+func (repo *authRepositoryImpl) GetAllUsers() ([]*models.User, error) {
+	var users []*models.User
+	if err := repo.DB.Where("role = ?", "user").Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (repo *authRepositoryImpl) BlockUserByID(id uint) error {
+	return repo.DB.Model(&models.User{}).
+		Where("id = ?", id).
+		Update("is_blocked", true).Error
+}
+
+func (repo *authRepositoryImpl) UnblockUserByID(id uint) error {
+	return repo.DB.Model(&models.User{}).
+		Where("id = ?", id).
+		Update("is_blocked", false).Error
+}
+
+func (repo *authRepositoryImpl) DeleteUserByID(id uint) error {
+	return repo.DB.Delete(&models.User{}, id).Error
 }

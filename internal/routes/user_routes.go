@@ -18,6 +18,17 @@ func SetAuthRoutes(router *gin.Engine, authHandler *handlers.AuthHandler) {
 	{
 		dashboard.GET("/dashboard", authHandler.GetUserData)
 		dashboard.PUT("/update", authHandler.UpdateUserData)
+
+	}
+
+	admin := router.Group("/admin/user")
+	admin.Use(middleware.AuthMiddleware(), middleware.AdminMiddleware())
+	{
+		admin.GET("/all", authHandler.GetAllUsers)
+		admin.PUT("/block/:id", authHandler.BlockUser)
+		admin.PUT("/unblock/:id", authHandler.UnblockUser)
+		admin.DELETE("/:id", authHandler.DeleteUser)
+
 	}
 
 	//admin := router.Group("/admin")

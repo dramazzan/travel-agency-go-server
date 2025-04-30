@@ -14,6 +14,10 @@ type AuthService interface {
 	Login(email, password string) (string, error)
 	GetUserDataById(id uint) (*models.User, error)
 	UpdateUser(user *models.User) error
+	BlockUserByID(id uint) error
+	UnblockUserByID(id uint) error
+	GetAllUsers() ([]*models.User, error)
+	DeleteUserByID(id uint) error
 }
 
 type authService struct {
@@ -21,8 +25,16 @@ type authService struct {
 	basketService BasketService
 }
 
-func NewAuthService(repository repositories.AuthRepository, basketService BasketService) AuthService {
+func NewAuthService(repository repositories.AuthRepository, basketService BasketService) *authService {
 	return &authService{repository: repository, basketService: basketService}
+}
+
+func (s *authService) GetAllUsers() ([]*models.User, error) {
+	users, err := s.repository.GetAllUsers()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch users: %w", err)
+	}
+	return users, nil
 }
 
 func (s *authService) Register(username, email, password string) error {
@@ -64,6 +76,10 @@ func (s *authService) Login(email, password string) (string, error) {
 		return "", fmt.Errorf("invalid email or password")
 	}
 
+	if user.IsBlocked {
+		return "", fmt.Errorf("user is blocked")
+	}
+
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return "", fmt.Errorf("invalid email or password")
@@ -89,7 +105,26 @@ func (s *authService) GetUserDataById(id uint) (*models.User, error) {
 func (s *authService) UpdateUser(user *models.User) error {
 	return s.repository.Update(user)
 }
+func (s *authService) BlockUserByID(id uint) error {
+	err := s.repository.BlockUserByID(id)
+	if err != nil {
+		return fmt.Errorf("failed to block user: %w", err)
+	}
+	return nil
+}
 
-//func (s *tourService) UpdateTour(tour *models.Tour) error {
-//	return s.repository.Update(tour)
-//}
+func (s *authService) UnblockUserByID(id uint) error {
+	err := s.repository.UnblockUserByID(id)
+	if err != nil {
+		return fmt.Errorf("failed to unblock user: %w", err)
+	}
+	return nil
+}
+
+func (s *authService) DeleteUserByID(id uint) error {
+	err := s.repository.DeleteUserByID(id)
+	if err != nil {
+		return fmt.Errorf("failed to delete user: %w", err)
+	}
+	return nil
+}
