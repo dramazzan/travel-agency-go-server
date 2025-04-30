@@ -13,6 +13,10 @@ type TourHandler struct {
 	service services.TourService
 }
 
+type tourRequest struct {
+	Category uint `json:"category" binding:"required"`
+}
+
 func NewTourHandler(service services.TourService) *TourHandler {
 	return &TourHandler{service: service}
 }
@@ -94,4 +98,20 @@ func (h *TourHandler) DeleteTour(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Тур успешно удален"})
+}
+
+func (h *TourHandler) GetTourByCategory(c *gin.Context) {
+	category := c.Query("category")
+	if category == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Параметр 'category' обязателен"})
+		return
+	}
+
+	tours, err := h.service.GetTourByCategory(category)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, tours)
 }

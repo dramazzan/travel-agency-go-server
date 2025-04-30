@@ -8,6 +8,7 @@ import (
 type TourRepository interface {
 	FindAll() ([]models.Tour, error)
 	FindByID(id uint) (models.Tour, error)
+	GetTourByCategory(category string) ([]models.Tour, error)
 	Create(tour *models.Tour) error
 	Update(tour *models.Tour) error
 	Delete(id uint) error
@@ -17,7 +18,7 @@ type tourRepository struct {
 	db *gorm.DB
 }
 
-func NewTourRepository(db *gorm.DB) TourRepository {
+func NewTourRepository(db *gorm.DB) *tourRepository {
 	return &tourRepository{db: db}
 }
 
@@ -33,6 +34,13 @@ func (r *tourRepository) FindByID(id uint) (models.Tour, error) {
 	return tour, result.Error
 }
 
+func (r *tourRepository) GetTourByCategory(category string) ([]models.Tour, error) {
+	var tours []models.Tour
+	if err := r.db.Where("category = ?", category).Find(&tours).Error; err != nil {
+		return nil, err
+	}
+	return tours, nil
+}
 func (r *tourRepository) Create(tour *models.Tour) error {
 	return r.db.Create(tour).Error
 }

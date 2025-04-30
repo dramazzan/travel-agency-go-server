@@ -55,7 +55,17 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.SetCookie(
+		"authToken",
+		token,
+		3600,
+		"/",
+		"",
+		false,
+		false,
+	)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Logged in successfully"})
 }
 
 func (h *AuthHandler) GetUserData(c *gin.Context) {

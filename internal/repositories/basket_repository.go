@@ -27,7 +27,8 @@ func (r *basketRepository) Create(basket *models.Basket) error {
 
 func (r *basketRepository) FindByUserID(userID uint) (models.Basket, error) {
 	var basket models.Basket
-	err := r.db.Preload("Tours").Where("user_id = ?", userID).First(&basket).Error
+	err := r.db.Preload("User").Preload("Tours").Where("user_id = ?", userID).First(&basket).Error
+
 	return basket, err
 }
 

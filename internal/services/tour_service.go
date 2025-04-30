@@ -11,13 +11,14 @@ type TourService interface {
 	CreateTour(tour *models.Tour) error
 	UpdateTour(tour *models.Tour) error
 	DeleteTour(id uint) error
+	GetTourByCategory(category string) ([]models.Tour, error)
 }
 
 type tourService struct {
 	repository repositories.TourRepository
 }
 
-func NewTourService(repository repositories.TourRepository) TourService {
+func NewTourService(repository repositories.TourRepository) *tourService {
 	return &tourService{repository: repository}
 }
 
@@ -27,6 +28,10 @@ func (s *tourService) GetAllTours() ([]models.Tour, error) {
 
 func (s *tourService) GetTourByID(id uint) (models.Tour, error) {
 	return s.repository.FindByID(id)
+}
+
+func (s *tourService) GetTourByCategory(category string) ([]models.Tour, error) {
+	return s.repository.GetTourByCategory(category)
 }
 
 func (s *tourService) CreateTour(tour *models.Tour) error {

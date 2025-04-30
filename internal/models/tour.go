@@ -15,7 +15,7 @@ type Tour struct {
 	EndDate     time.Time      `json:"end_date" binding:"required"`
 	Price       float64        `json:"price" binding:"required" gorm:"check:price >= 0"`
 	MaxCapacity int            `json:"max_capacity"`
-	Category    string         `json:"category" binding:"required" gorm:"default: 'new'"`
+	Category    string         `json:"category" gorm:"default: 'new'"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`

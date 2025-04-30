@@ -11,6 +11,7 @@ func SetTourRoutes(router *gin.Engine, tourHandler *handlers.TourHandler) {
 	{
 		tours.GET("", tourHandler.GetAllTours)
 		tours.GET("/:id", tourHandler.GetTourByID)
+		tours.GET("/category", tourHandler.GetTourByCategory)
 	}
 
 	adminRoutes := router.Group("/admin/tour")
