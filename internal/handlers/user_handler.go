@@ -70,7 +70,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Name:     "authToken",
 		Value:    token,
 		Path:     "/",
-		Domain:   "https://tour-agency-next.vercel.app",
+		Domain:   ".up.railway.app",
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
