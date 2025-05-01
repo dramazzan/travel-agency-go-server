@@ -72,7 +72,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		3600,
 		"/",
 		"",
-		false,
+		true,
 		false,
 	)
 
