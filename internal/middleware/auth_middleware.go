@@ -1,31 +1,21 @@
 package middleware
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"server-go/internal/auth"
-	"strings"
-
-	"github.com/gin-gonic/gin"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
+		cookie, err := c.Request.Cookie("authToken")
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "authToken cookie missing"})
 			c.Abort()
 			return
 		}
 
-		fields := strings.Fields(authHeader)
-		if len(fields) != 2 || fields[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
-			c.Abort()
-			return
-		}
-
-		tokenString := fields[1]
-
+		tokenString := cookie.Value
 		claims, err := auth.ValidateToken(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -39,6 +29,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
 		userID := uint(userIDFloat)
 
 		c.Set("userID", userID)
