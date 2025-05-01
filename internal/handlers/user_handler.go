@@ -70,7 +70,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Name:     "authToken",
 		Value:    token,
 		Path:     "/",
-		Domain:   "localhost",
+		Domain:   "",
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
