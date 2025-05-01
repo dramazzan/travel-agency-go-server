@@ -70,7 +70,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Name:     "authToken",
 		Value:    token,
 		Path:     "/",
-		Domain:   "",
+		Domain:   "travel-agency-go-server-production.up.railway.app",
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
