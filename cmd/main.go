@@ -54,7 +54,7 @@ func main() {
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://tour-agency-next.vercel.app"},
+		AllowOrigins:     []string{"https://tour-agency-next.vercel.app", "http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -64,9 +64,6 @@ func main() {
 	routes.SetTourRoutes(router, tourHandler)
 	routes.SetAuthRoutes(router, authHandler)
 	routes.SetBasketRoutes(router, basketHandler)
-	router.OPTIONS("/*path", func(c *gin.Context) {
-		c.Status(200)
-	})
 
 	if err := router.Run(":8080"); err != nil {
 		log.Fatalf("Не удалось запустить сервер: %v", err)
